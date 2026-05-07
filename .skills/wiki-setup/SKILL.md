@@ -33,6 +33,17 @@ If `.env` doesn't exist, create it from `.env.example`. Ask the user for:
    - If unsure, skip for now — both skills fall back to `Grep` automatically.
    - Install instructions: see `.env.example` (QMD section).
 
+5. **Filename style for new pages?** → `OBSIDIAN_FILENAME_STYLE`
+   - `dashed` (default) — `concepts/react-server-components.md`. Works out of the box in plain Obsidian.
+   - `dotted` — `concepts/react.server-components.md`. Dendron-style hierarchical filenames; renders as a tree if the [Structured Tree](https://github.com/levirs565/obsidian-structured) community plugin is installed. Wikilinks and graph view work in either style.
+   - Only affects newly created pages — existing files are never renamed by switching this.
+   - If unsure, accept the default. You can switch later without breaking anything.
+
+6. **Importing an existing Dendron vault?** → `OBSIDIAN_DENDRON_SOURCE_PATHS`
+   - Optional. Comma-separated paths to directories of dotted `.md` files (e.g. an exported Dendron vault).
+   - When set, `wiki-ingest` parses the dot-prefix of each filename as a hierarchy hint during distillation.
+   - Leave empty if you have no Dendron vault to import.
+
 ## Step 2: Create Vault Directory Structure
 
 ```bash
@@ -142,6 +153,7 @@ Tell the user about these recommended community plugins (they install manually):
 2. **Graph Analysis** — Enhanced graph view for exploring connections.
 3. **Templater** — If they want to create pages manually using templates.
 4. **Obsidian Git** — Auto-backup the vault to a git repo.
+5. **Structured Tree** *(only if `OBSIDIAN_FILENAME_STYLE=dotted`)* — Renders Dendron-style dotted filenames as a hierarchical tree in the sidebar. Without it, dotted files appear flat in the file explorer. Repo: https://github.com/levirs565/obsidian-structured.
 
 ## Step 6: Verify Setup
 

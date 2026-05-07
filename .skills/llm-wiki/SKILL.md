@@ -82,6 +82,8 @@ $OBSIDIAN_VAULT_PATH/
 
 **Naming rule:** The project overview file must be named `<project-name>.md`, not `_project.md`. Obsidian's graph view uses the filename as the node label — `_project.md` makes every project appear as `_project` in the graph, making it unreadable. So `projects/my-project/my-project.md`, `projects/another-project/another-project.md`, etc.
 
+**Filename style:** Within a category directory, filenames may use dashed slugs (`react-server-components.md`) or Dendron-style dotted hierarchies (`react.server-components.md`). The choice is controlled by `OBSIDIAN_FILENAME_STYLE` — see the Filename Styles section below. The naming rule above (project overview must be named after the project) applies in both styles.
+
 Each project directory has an overview page structured like this:
 
 ```markdown
@@ -161,6 +163,8 @@ tags: [ml, architecture]
 aliases: [alternate name]
 sources: [papers/attention.pdf]
 summary: One or two sentences, ≤200 chars, so a reader (or another skill) can preview this page without opening it.
+# desc: alias of summary — accepted on Dendron-imported pages
+# id: stable identifier (alias) — accepted on Dendron-imported pages, never required
 provenance:
   extracted: 0.72
   inferred: 0.25
@@ -367,6 +371,42 @@ The `[[path\|display text]]` wikilink form maps to `[display text](relative/path
 
 Every write skill reads `OBSIDIAN_LINK_FORMAT` from config before generating links and applies the correct format.
 
+## Filename Styles
+
+The filename style for newly created pages is controlled by `OBSIDIAN_FILENAME_STYLE` (read from `~/.obsidian-wiki/config` or `.env`, default: `dashed`).
+
+| Setting | Convention | Example filenames |
+|---|---|---|
+| `dashed` *(default)* | Lowercase words joined by `-` within the category dir; subtopics get descriptive slugs | `concepts/react-server-components.md`, `concepts/react-server-components-streaming.md` |
+| `dotted` | Lowercase words joined by `-` within a segment; segments joined by `.` to express hierarchy (Dendron convention) | `concepts/react.md`, `concepts/react.server-components.md`, `concepts/react.server-components.streaming.md` |
+
+Both styles produce plain `.md` files that Obsidian opens normally. Wikilinks resolve identically — `[[react.server-components]]` works the same way `[[react-server-components]]` does. The Structured Tree community plugin renders dotted names as a hierarchical tree in the sidebar; without it, dotted files appear flat in the file explorer.
+
+**Mixing styles is fine.** A vault that started in `dashed` and switches to `dotted` keeps every existing page where it is — only newly written pages follow the new style. Skills never rename existing files based on this setting.
+
+**Generating dotted filenames:**
+
+1. Compute the slug for the leaf concept the same way you would in `dashed` mode (lowercase, hyphen-joined within the segment).
+2. Prepend the parent slug(s) joined by `.`. Use what's already in the vault as the source of truth: if `concepts/react.md` exists, a child page about RSC becomes `concepts/react.server-components.md`. If no parent exists yet, write the leaf flat (`concepts/server-components.md`) and add the parent stub later when the topic naturally requires one.
+3. Never invent a hierarchy that isn't justified by existing pages. Two siblings under an unwritten parent should not force a parent stub — keep them flat until the parent is genuinely warranted.
+
+**Wikilink resolution rule:** in `dotted` mode, link to the full filename, e.g. `[[concepts/react.server-components]]`. Do not abbreviate to `[[server-components]]` — Obsidian resolves wikilinks by basename, so multiple files with the same leaf would collide.
+
+**Scope:** this setting affects only newly created files. Renaming or restyling existing files is out of scope for the framework — users can do it manually if they want a uniform style.
+
+Every write skill reads `OBSIDIAN_FILENAME_STYLE` from config before generating filenames.
+
+## Dendron-Imported Frontmatter
+
+Dendron vaults use two frontmatter fields that this framework treats as **optional aliases**, never required:
+
+| Dendron field | Maps to | Notes |
+|---|---|---|
+| `id` | (no native equivalent) | Stable per-page identifier. Preserved verbatim on import; never generated for new pages. |
+| `desc` | `summary` | If both `summary` and `desc` are present on a page, `summary` wins. If only `desc` is present, treat it as the page's summary for retrieval purposes. |
+
+These aliases exist so a Dendron vault can be ingested via `OBSIDIAN_DENDRON_SOURCE_PATHS` (see `wiki-ingest`) without losing metadata. New pages this framework writes do not emit `id` or `desc` — they use `summary` and skip stable IDs.
+
 ## Environment Variables
 
 The wiki is configured through environment variables (see `.env.example`). The only required variable is the vault path — everything else has sensible defaults.
@@ -376,6 +416,8 @@ The wiki is configured through environment variables (see `.env.example`). The o
 - `OBSIDIAN_CATEGORIES` — Comma-separated list of categories
 - `CLAUDE_HISTORY_PATH` — Where to find Claude conversation data
 - `OBSIDIAN_LINK_FORMAT` — Internal link syntax: `wikilink` (default) or `markdown`
+- `OBSIDIAN_FILENAME_STYLE` — Filename convention for new pages: `dashed` (default) or `dotted` (Dendron-style hierarchy)
+- `OBSIDIAN_DENDRON_SOURCE_PATHS` — Comma-separated paths to Dendron vaults for hierarchy-aware ingest
 
 No API keys are needed — the agent running these skills already has LLM access built in.
 

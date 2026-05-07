@@ -17,11 +17,14 @@ You are distilling knowledge from the current project into the user's Obsidian w
    - `OBSIDIAN_VAULT_PATH` — where the wiki lives
    - `OBSIDIAN_WIKI_REPO` — where the obsidian-wiki repo is cloned (for reading other skills if needed)
    - `OBSIDIAN_LINK_FORMAT` — `wikilink` (default) or `markdown`
+   - `OBSIDIAN_FILENAME_STYLE` — `dashed` (default) or `dotted`
 2. If `~/.obsidian-wiki/config` doesn't exist, tell the user to run `bash setup.sh` from their obsidian-wiki repo first.
 3. Read `$OBSIDIAN_VAULT_PATH/.manifest.json` to check if this project has been synced before.
 4. Read `$OBSIDIAN_VAULT_PATH/index.md` to know what the wiki already contains.
 
 When writing internal links in Steps 4–5, apply the link format from `llm-wiki/SKILL.md` (Link Format section) using the `OBSIDIAN_LINK_FORMAT` value.
+
+When generating filenames for **new** project-specific or global pages in Step 4, apply the filename style from `llm-wiki/SKILL.md` (Filename Styles section) using the `OBSIDIAN_FILENAME_STYLE` value. The project overview file is always named `<project-name>.md` regardless of style. Existing pages are never renamed.
 
 ## Step 1: Understand the Project
 

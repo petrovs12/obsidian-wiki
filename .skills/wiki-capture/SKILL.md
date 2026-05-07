@@ -14,11 +14,13 @@ You are preserving knowledge from the current conversation as a permanent wiki n
 
 ## Before You Start
 
-1. Read `~/.obsidian-wiki/config` (preferred) or `.env` (fallback) to get `OBSIDIAN_VAULT_PATH` and `OBSIDIAN_LINK_FORMAT` (default: `wikilink`)
+1. Read `~/.obsidian-wiki/config` (preferred) or `.env` (fallback) to get `OBSIDIAN_VAULT_PATH`, `OBSIDIAN_LINK_FORMAT` (default: `wikilink`), and `OBSIDIAN_FILENAME_STYLE` (default: `dashed`)
 2. Read `$OBSIDIAN_VAULT_PATH/index.md` to understand existing wiki content (avoid duplicates)
 3. Read `$OBSIDIAN_VAULT_PATH/hot.md` if it exists — it gives context on recent activity
 
 When writing internal links in Step 5, apply the link format from `llm-wiki/SKILL.md` (Link Format section) using the `OBSIDIAN_LINK_FORMAT` value.
+
+When generating the slug in Step 4 and the filename in Step 5, apply the filename style from `llm-wiki/SKILL.md` (Filename Styles section) using the `OBSIDIAN_FILENAME_STYLE` value. In `dotted` mode, prepend an existing parent slug (e.g. `react.<slug>.md`) only when one already exists in the vault — never invent a parent stub.
 
 ## Step 1: Identify What's Worth Preserving
 

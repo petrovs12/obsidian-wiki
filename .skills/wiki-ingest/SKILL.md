@@ -15,12 +15,14 @@ You are ingesting source documents into an Obsidian wiki. Your job is not to sum
 
 ## Before You Start
 
-1. Read `~/.obsidian-wiki/config` (preferred) or `.env` (fallback) to get `OBSIDIAN_VAULT_PATH`, `OBSIDIAN_SOURCES_DIR`, and `OBSIDIAN_LINK_FORMAT` (default: `wikilink`). Only read the specific variables you need — do not log, echo, or reference any other values from these files.
+1. Read `~/.obsidian-wiki/config` (preferred) or `.env` (fallback) to get `OBSIDIAN_VAULT_PATH`, `OBSIDIAN_SOURCES_DIR`, `OBSIDIAN_LINK_FORMAT` (default: `wikilink`), `OBSIDIAN_FILENAME_STYLE` (default: `dashed`), and `OBSIDIAN_DENDRON_SOURCE_PATHS` (optional). Only read the specific variables you need — do not log, echo, or reference any other values from these files.
 2. Read `.manifest.json` at the vault root to check what's already been ingested
 3. Read `index.md` to understand current wiki content
 4. Read `log.md` to understand recent activity
 
 When writing internal links in Step 5, apply the link format described in `llm-wiki/SKILL.md` (Link Format section) according to the `OBSIDIAN_LINK_FORMAT` value you read.
+
+When generating filenames for **new** pages in Step 5, apply the filename style described in `llm-wiki/SKILL.md` (Filename Styles section) according to the `OBSIDIAN_FILENAME_STYLE` value you read. Existing pages are never renamed.
 
 ## Content Trust Boundary
 
@@ -64,6 +66,31 @@ Process draft pages from the `_raw/` staging directory inside the vault. Use whe
 In raw mode, each file in `OBSIDIAN_VAULT_PATH/_raw/` (or `OBSIDIAN_RAW_DIR`) is treated as a source. After promoting a file to a proper wiki page, **delete the original from `_raw/`**. Never leave promoted files in `_raw/` — they'll be double-processed on the next run.
 
 **Deletion safety:** Only delete the specific file that was just promoted. Before deleting, verify the resolved path is inside `$OBSIDIAN_VAULT_PATH/_raw/` — never delete files outside this directory. Never use wildcards or recursive deletion (`rm -rf`, `rm *`). Delete one file at a time by its exact path.
+
+## Dendron Source Mode (optional)
+
+When `OBSIDIAN_DENDRON_SOURCE_PATHS` is set, the directories it lists are treated as Dendron-style source vaults: a flat tree of `.md` files whose **filename dot-prefix encodes a hierarchy** (`react.server-components.streaming.md` is a child of `react.server-components.md`, which is a child of `react.md`).
+
+This mode is **opt-in**. If `OBSIDIAN_DENDRON_SOURCE_PATHS` is unset, skip this entire section — sources are read with the normal logic above.
+
+**How to recognize a Dendron source:**
+- The directory is listed in `OBSIDIAN_DENDRON_SOURCE_PATHS` (authoritative signal)
+- *or* — as a fallback heuristic when scanning a path the user pointed at ad-hoc — the directory contains many flat `.md` files whose names use dots as separators, and at least some of them carry `id:` and `desc:` frontmatter fields
+
+**How Dendron metadata informs distillation:**
+
+1. **Hierarchy hint.** Parse each filename's dot-prefix. `react.server-components.streaming.md` tells you the source author considered this a child of `react.server-components`, which is a child of `react`. Use this when:
+   - **Categorizing**: a child of an entity-shaped parent (a tool, a person) probably also belongs in `entities/`. A child of an abstract parent probably belongs in `concepts/`. Use the parent's category as a strong default when categorizing the child.
+   - **Tagging**: lift the parent slug as a tag candidate, subject to taxonomy rules (`_meta/taxonomy.md`, ≤5 tags). A child page about `react.server-components.streaming` probably wants both `react` and `server-components` tags.
+   - **Cross-linking**: when distilling a Dendron child, always check whether the parent's wiki page exists and add a `[[wikilink]]` to it. Conversely, when a parent has many children in the source vault, surface that breadth on the parent's wiki page (link to the child wiki pages, or call out the topic spread).
+
+2. **Frontmatter aliases.** If the source page has a Dendron `desc:` field, use it as the `summary:` for the wiki page (subject to the ≤200-char rule — truncate or rewrite if it's longer). If the source page has an `id:`, preserve it verbatim in the wiki page's frontmatter — don't generate one for sources that don't have it. See the **Dendron-Imported Frontmatter** section in `llm-wiki/SKILL.md`.
+
+3. **Output filenames.** The output filename style follows `OBSIDIAN_FILENAME_STYLE`, **not** the source style. Importing dotted Dendron names into a `dashed` vault produces dashed pages whose hierarchy is reflected via wikilinks and tags rather than filenames; importing into a `dotted` vault preserves the dotted hierarchy verbatim where it makes sense.
+
+**Don't over-trust the hierarchy.** Dendron names reflect *the source author's* organization, which may not match this vault's category structure. Treat the hierarchy as a strong hint, not a constraint — if a Dendron child clearly belongs in a different category than its parent's wiki page, place it where it belongs and link across.
+
+**Don't promote unjustified parents.** If `react.server-components.streaming.md` exists in the source but `react.server-components.md` and `react.md` do not, do not invent stub parents in the wiki. Leave the leaf flat and only add parents when the topic naturally requires them.
 
 ## The Ingest Process
 

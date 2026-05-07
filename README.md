@@ -405,6 +405,17 @@ claude
 
 Both skills follow the same Karpathy pattern as everything else. If a concept page already exists in the vault, it merges into it. Everything gets cross-linked with `[[wikilinks]]`, tracked in `.manifest.json`, and logged.
 
+## Dendron Compatibility (optional)
+
+If you come from [Dendron](https://www.dendron.so/) — or want to ingest an existing Dendron vault as a source — the framework supports two opt-in flags:
+
+- **`OBSIDIAN_FILENAME_STYLE=dotted`** — write new pages as Dendron-style hierarchical filenames (`concepts/react.server-components.streaming.md`) instead of the default dashed slugs. Wikilinks and Obsidian's graph view work in either style; the [Structured Tree](https://github.com/levirs565/obsidian-structured) community plugin renders dotted names as a tree in the sidebar. Existing dashed pages are never renamed when you flip this — only newly created files follow the new style.
+- **`OBSIDIAN_DENDRON_SOURCE_PATHS=<paths>`** — comma-separated directories that contain a flat tree of dotted `.md` files (e.g. an exported Dendron vault). When set, `wiki-ingest` and `data-ingest` parse each filename's dot-prefix as a hierarchy hint that informs categorization, tagging, and cross-linking during distillation.
+
+Dendron's `id` and `desc` frontmatter fields are accepted as optional aliases on imported pages (`desc` is a synonym for `summary`); new pages this framework writes never emit them. The defaults (dashed filenames, no Dendron source paths) leave behavior unchanged — Dendron support is purely additive.
+
+See `.skills/llm-wiki/SKILL.md` (Filename Styles) and `.skills/wiki-ingest/SKILL.md` (Dendron Source Mode) for the full convention.
+
 ## Contributing
 
 This is early. The skills work but there's a lot of room to make them smarter — better cross-referencing, smarter deduplication, handling larger vaults, new ingest sources. If you've been thinking about this problem or have a workflow that could be a skill, PRs are welcome.

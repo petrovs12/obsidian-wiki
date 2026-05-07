@@ -107,6 +107,22 @@ Pages can carry a `visibility/` tag to mark their intended reach. **This is enti
 
 See `wiki-query` and `wiki-export` skills for how the filter is applied.
 
+## Dendron Compatibility (optional)
+
+The framework can read and write Dendron-style dotted filenames (`react.server-components.streaming.md`), and can ingest existing Dendron vaults as sources. **This is entirely optional** — the default behavior (dashed filenames, no Dendron source paths) is unchanged.
+
+| Config var | Default | Effect |
+|---|---|---|
+| `OBSIDIAN_FILENAME_STYLE=dashed` | dashed | Newly created pages use slugs like `concepts/react-server-components.md` *(unchanged behavior)* |
+| `OBSIDIAN_FILENAME_STYLE=dotted` | — | Newly created pages use Dendron-style hierarchical filenames like `concepts/react.server-components.md`. Existing dashed pages are never renamed. |
+| `OBSIDIAN_DENDRON_SOURCE_PATHS=<paths>` | unset | Comma-separated list of directories that contain a flat tree of dotted `.md` files. `wiki-ingest` and `data-ingest` parse the dot-prefix of each filename as a hierarchy hint when distilling. |
+
+The framework also accepts Dendron's `id` and `desc` frontmatter fields as optional aliases on imported pages — `desc` is treated as a synonym for `summary` (`summary` wins if both are present). New pages this framework writes never emit these aliases.
+
+For visualizing dotted names as a tree inside Obsidian, install the [Structured Tree](https://github.com/levirs565/obsidian-structured) community plugin. Without it, dotted files appear flat in the file explorer; wikilinks and graph view work either way.
+
+See the **Filename Styles** and **Dendron-Imported Frontmatter** sections in `.skills/llm-wiki/SKILL.md` for the full convention.
+
 ## Core Principles
 
 - **Compile, don't retrieve.** The wiki is pre-compiled knowledge. Update existing pages — don't append or duplicate.

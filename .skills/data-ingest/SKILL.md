@@ -15,11 +15,13 @@ You are ingesting arbitrary text data into an Obsidian wiki. The source could be
 
 ## Before You Start
 
-1. Read `~/.obsidian-wiki/config` (preferred) or `.env` (fallback) to get `OBSIDIAN_VAULT_PATH` and `OBSIDIAN_LINK_FORMAT` (default: `wikilink`)
+1. Read `~/.obsidian-wiki/config` (preferred) or `.env` (fallback) to get `OBSIDIAN_VAULT_PATH`, `OBSIDIAN_LINK_FORMAT` (default: `wikilink`), `OBSIDIAN_FILENAME_STYLE` (default: `dashed`), and `OBSIDIAN_DENDRON_SOURCE_PATHS` (optional)
 2. Read `.manifest.json` at the vault root — check if this source has been ingested before
 3. Read `index.md` at the vault root to know what already exists
 
 When writing internal links, apply the link format from `llm-wiki/SKILL.md` (Link Format section) using the `OBSIDIAN_LINK_FORMAT` value.
+
+When generating filenames for new pages in Step 4, apply the filename style from `llm-wiki/SKILL.md` (Filename Styles section) using the `OBSIDIAN_FILENAME_STYLE` value. If the source path is listed in `OBSIDIAN_DENDRON_SOURCE_PATHS`, also apply the **Dendron Source Mode** logic from `wiki-ingest/SKILL.md` — parse each filename's dot-prefix as a hierarchy hint that informs categorization, tagging, and cross-linking.
 
 If the source path is already in `.manifest.json` and the file hasn't been modified since `ingested_at`, tell the user it's already been ingested. Ask if they want to re-ingest anyway.
 
